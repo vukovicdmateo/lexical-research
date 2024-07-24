@@ -2,6 +2,33 @@ import invariant from 'shared/invariant';
 
 export type NodeMap = Map<NodeKey, LexicalNode>;
 
+export type DOMConversion<T extends HTMLElement = HTMLElement> = {
+  conversion: DOMConversionFn<T>;
+  priority?: 0 | 1 | 2 | 3 | 4;
+};
+
+export type DOMConversionFn<T extends HTMLElement = HTMLElement> = (
+  element: T
+) => DOMConversionOutput | null;
+
+export type DOMChildConversion = (
+  lexicalNode: LexicalNode,
+  parentLexicalNode: LexicalNode | null | undefined
+) => LexicalNode | null | undefined;
+
+export type DOMConversionMap<T extends HTMLElement = HTMLElement> = Record<
+  NodeName,
+  (node: T) => DOMConversion<T> | null
+>;
+
+type NodeName = string;
+
+export type DOMConversionOutput = {
+  after?: (childLexicalNodes: Array<LexicalNode>) => Array<LexicalNode>;
+  forChild?: DOMChildConversion;
+  node: null | LexicalNode | Array<LexicalNode>;
+};
+
 export type NodeKey = string;
 
 export class LexicalNode {
@@ -50,6 +77,9 @@ export class LexicalNode {
       this.name
     );
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static importDOM?: () => DOMConversionMap<any> | null;
 
   // TODO: continue here
 }
