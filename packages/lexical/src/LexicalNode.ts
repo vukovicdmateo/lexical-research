@@ -2,6 +2,8 @@ import type { KlassConstructor } from 'lexical';
 
 import invariant from 'shared/invariant';
 
+import { $setNodeKey } from './LexicalUtils';
+
 export type NodeMap = Map<NodeKey, LexicalNode>;
 
 export type DOMConversion<T extends HTMLElement = HTMLElement> = {
@@ -85,12 +87,12 @@ export class LexicalNode {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static importDOM?: () => DOMConversionMap<any> | null;
 
-  constructor() {
+  constructor(key?: NodeKey) {
     this.__type = this.constructor.getType();
     this.__parent = null;
     this.__prev = null;
     this.__next = null;
-    // TODO: Continue here
+    $setNodeKey(this, key);
   }
 
   // Getters and Traversers
