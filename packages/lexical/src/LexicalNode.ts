@@ -1,3 +1,5 @@
+import type { KlassConstructor } from 'lexical';
+
 import invariant from 'shared/invariant';
 
 export type NodeMap = Map<NodeKey, LexicalNode>;
@@ -32,6 +34,8 @@ export type DOMConversionOutput = {
 export type NodeKey = string;
 
 export class LexicalNode {
+  // Allow us to look up the type including static props
+  ['constructor']!: KlassConstructor<typeof LexicalNode>;
   /** @internal */
   __type: string;
   /** @internal */
@@ -81,5 +85,20 @@ export class LexicalNode {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static importDOM?: () => DOMConversionMap<any> | null;
 
-  // TODO: continue here
+  constructor() {
+    this.__type = this.constructor.getType();
+    this.__parent = null;
+    this.__prev = null;
+    this.__next = null;
+    // TODO: Continue here
+  }
+
+  // Getters and Traversers
+
+  /**
+   * Returns the string type of this node.
+   */
+  getType(): string {
+    return this.__type;
+  }
 }

@@ -1,6 +1,18 @@
 import { createEmptyEditorState } from './LexicalEditorState';
 import { internalGetActiveEditor } from './LexicalUpdates';
 
+// https://github.com/microsoft/TypeScript/issues/3841
+/*
+KlassConstructor<Cls> is a type that combines a constructor function that
+produces instances of the type created by Cls and all the static members
+of Cls. 
+*/
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type KlassConstructor<Cls extends GenericConstructor<any>> =
+  GenericConstructor<InstanceType<Cls>> & { [k in keyof Cls]: Cls[k] };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type GenericConstructor<T> = new (...args: any[]) => T;
+
 export type EditorThemeClassName = string;
 
 export type EditorThemeClasses = {
