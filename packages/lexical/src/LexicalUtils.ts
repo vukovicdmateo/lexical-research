@@ -15,6 +15,7 @@ export function $setNodeKey(
     node.__key = existingKey;
     return;
   }
+  // TODO: continue here
 }
 
 function errorOnNodeKeyConstructorMismatch(
