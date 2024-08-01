@@ -2,7 +2,10 @@ import type { LexicalNode, NodeKey } from './LexicalNode';
 
 import invariant from 'shared/invariant';
 
-import { internalGetActiveEditorState } from './LexicalUpdates';
+import {
+  errorOnReadOnly,
+  internalGetActiveEditorState,
+} from './LexicalUpdates';
 
 export function $setNodeKey(
   node: LexicalNode,
@@ -15,6 +18,7 @@ export function $setNodeKey(
     node.__key = existingKey;
     return;
   }
+  errorOnReadOnly();
   // TODO: continue here
 }
 
