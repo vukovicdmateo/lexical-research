@@ -3,6 +3,7 @@ import type { LexicalNode, NodeKey } from './LexicalNode';
 import invariant from 'shared/invariant';
 
 import {
+  errorOnInfiniteTransforms,
   errorOnReadOnly,
   internalGetActiveEditorState,
 } from './LexicalUpdates';
@@ -19,7 +20,7 @@ export function $setNodeKey(
     return;
   }
   errorOnReadOnly();
-  // TODO: continue here
+  errorOnInfiniteTransforms();
 }
 
 function errorOnNodeKeyConstructorMismatch(
