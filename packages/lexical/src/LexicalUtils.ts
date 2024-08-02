@@ -21,6 +21,7 @@ export function $setNodeKey(
   }
   errorOnReadOnly();
   errorOnInfiniteTransforms();
+  // TODO: continue here
 }
 
 function errorOnNodeKeyConstructorMismatch(
