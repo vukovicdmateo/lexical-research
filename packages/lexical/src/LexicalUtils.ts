@@ -29,6 +29,7 @@ export function $setNodeKey(
   }
   errorOnReadOnly();
   errorOnInfiniteTransforms();
+  // TODO: Incorporate editor part
   const editorState = getActiveEditorState();
   const key = generateRandomKey();
   editorState._nodeMap.set(key, node);
