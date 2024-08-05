@@ -5,8 +5,16 @@ import invariant from 'shared/invariant';
 import {
   errorOnInfiniteTransforms,
   errorOnReadOnly,
+  getActiveEditor,
+  getActiveEditorState,
   internalGetActiveEditorState,
 } from './LexicalUpdates';
+
+let keyCounter = 1;
+
+export function generateRandomKey(): string {
+  return '' + keyCounter++;
+}
 
 export function $setNodeKey(
   node: LexicalNode,
@@ -21,7 +29,10 @@ export function $setNodeKey(
   }
   errorOnReadOnly();
   errorOnInfiniteTransforms();
-  // TODO: continue here
+  const editorState = getActiveEditorState();
+  const key = generateRandomKey();
+  editorState._nodeMap.set(key, node);
+  node.__key = key;
 }
 
 function errorOnNodeKeyConstructorMismatch(

@@ -24,6 +24,34 @@ export function errorOnInfiniteTransforms(): void {
   }
 }
 
+export function getActiveEditorState(): EditorState {
+  if (activeEditorState === null) {
+    invariant(
+      false,
+      'Unable to find an active editor state. ' +
+        'State helpers or node methods can only be used ' +
+        'synchronously during the callback of ' +
+        'editor.update(), editor.read(), or editorState.read().'
+    );
+  }
+
+  return activeEditorState;
+}
+
+export function getActiveEditor(): LexicalEditor {
+  if (activeEditor === null) {
+    invariant(
+      false,
+      'Unable to find an active editor. ' +
+        'This method can only be used ' +
+        'synchronously during the callback of ' +
+        'editor.update() or editor.read().'
+    );
+  }
+
+  return activeEditor;
+}
+
 export function internalGetActiveEditor(): LexicalEditor | null {
   return activeEditor;
 }
