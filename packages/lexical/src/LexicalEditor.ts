@@ -1,5 +1,6 @@
 import type { NodeKey } from './LexicalNode';
 import { createEmptyEditorState } from './LexicalEditorState';
+import { LexicalNode } from './LexicalNode';
 import { internalGetActiveEditor } from './LexicalUpdates';
 
 // https://github.com/microsoft/TypeScript/issues/3841
@@ -13,6 +14,12 @@ export type KlassConstructor<Cls extends GenericConstructor<any>> =
   GenericConstructor<InstanceType<Cls>> & { [k in keyof Cls]: Cls[k] };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type GenericConstructor<T> = new (...args: any[]) => T;
+
+export type Klass<T extends LexicalNode> = InstanceType<
+  T['constructor']
+> extends T
+  ? T['constructor']
+  : GenericConstructor<T> & T['constructor'];
 
 export type EditorThemeClassName = string;
 
@@ -34,6 +41,13 @@ export type CreateEditorArgs = {
   theme?: EditorThemeClasses;
 };
 
+export type RegisteredNodes = Map<string, RegisteredNode>;
+
+export type RegisteredNode = {
+  klass: Klass<LexicalNode>;
+  // TODO: contunue here
+};
+
 type IntentionallyMarkedAsDirtyElement = boolean;
 
 export function createEditor(editorConfig?: CreateEditorArgs): LexicalEditor {
@@ -53,6 +67,8 @@ export function createEditor(editorConfig?: CreateEditorArgs): LexicalEditor {
 export class LexicalEditor {
   ['constructor']!: KlassConstructor<typeof LexicalEditor>;
 
+  /** @internal */
+  _nodes: RegisteredNodes;
   /** @internal */
   _dirtyType: 0 | 1 | 2;
   /** @internal */

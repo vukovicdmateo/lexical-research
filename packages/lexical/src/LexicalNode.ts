@@ -1,7 +1,8 @@
-import type { KlassConstructor } from 'lexical';
+import type { Klass, KlassConstructor } from 'lexical';
 
 import invariant from 'shared/invariant';
 
+import { errorOnReadOnly, getActiveEditor } from './LexicalUpdates';
 import { $setNodeKey } from './LexicalUtils';
 
 export type NodeMap = Map<NodeKey, LexicalNode>;
@@ -93,6 +94,13 @@ export class LexicalNode {
     this.__prev = null;
     this.__next = null;
     $setNodeKey(this, key);
+
+    if (__DEV__) {
+      if (this.__type !== 'root') {
+        errorOnReadOnly();
+        errorOnTypeKlassMismatch(this.__type, this.constructor);
+      }
+    }
   }
 
   // Getters and Traversers
@@ -102,5 +110,30 @@ export class LexicalNode {
    */
   getType(): string {
     return this.__type;
+  }
+}
+
+function errorOnTypeKlassMismatch(
+  type: string,
+  klass: Klass<LexicalNode>
+): void {
+  const registeredNode = getActiveEditor()._nodes.get(type);
+  // Common error - split in its own invariant
+  if (registeredNode === undefined) {
+    invariant(
+      false,
+      'Create node: Attempted to create node %s that was not configured to be used on the editor.',
+      klass.name
+    );
+  }
+  const editorKlass = registeredNode.klass;
+  if (editorKlass !== klass) {
+    invariant(
+      false,
+      'Create node: Type %s in node %s does not match registered node %s with the same type',
+      type,
+      klass.name,
+      editorKlass.name
+    );
   }
 }
