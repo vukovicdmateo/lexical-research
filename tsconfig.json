@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2019",
+    "baseUrl": ".",
     "paths": {
       "lexical": ["./packages/lexical/src/index.ts"],
       "shared/invariant": ["./packages/shared/src/invariant.ts"]

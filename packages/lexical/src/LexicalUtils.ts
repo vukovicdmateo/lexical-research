@@ -2,6 +2,9 @@ import type { LexicalNode, NodeKey } from './LexicalNode';
 
 import invariant from 'shared/invariant';
 
+import { $isElementNode } from 'lexical';
+import { HAS_DIRTY_NODES } from './LexicalConstants';
+
 import {
   errorOnInfiniteTransforms,
   errorOnReadOnly,
@@ -29,10 +32,17 @@ export function $setNodeKey(
   }
   errorOnReadOnly();
   errorOnInfiniteTransforms();
-  // TODO: Incorporate editor part
+  const editor = getActiveEditor();
   const editorState = getActiveEditorState();
   const key = generateRandomKey();
   editorState._nodeMap.set(key, node);
+  if ($isElementNode(node)) {
+    editor._dirtyElements.set(key, true);
+  } else {
+    editor._dirtyLeaves.add(key);
+  }
+  editor._cloneNotNeeded.add(key);
+  editor._dirtyType = HAS_DIRTY_NODES;
   node.__key = key;
 }
 

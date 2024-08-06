@@ -1,3 +1,4 @@
+import type { NodeKey } from './LexicalNode';
 import { createEmptyEditorState } from './LexicalEditorState';
 import { internalGetActiveEditor } from './LexicalUpdates';
 
@@ -33,6 +34,8 @@ export type CreateEditorArgs = {
   theme?: EditorThemeClasses;
 };
 
+type IntentionallyMarkedAsDirtyElement = boolean;
+
 export function createEditor(editorConfig?: CreateEditorArgs): LexicalEditor {
   const config = editorConfig || {};
   const activeEditor = internalGetActiveEditor();
@@ -47,4 +50,15 @@ export function createEditor(editorConfig?: CreateEditorArgs): LexicalEditor {
   return editor;
 }
 
-export class LexicalEditor {}
+export class LexicalEditor {
+  ['constructor']!: KlassConstructor<typeof LexicalEditor>;
+
+  /** @internal */
+  _dirtyType: 0 | 1 | 2;
+  /** @internal */
+  _cloneNotNeeded: Set<NodeKey>;
+  /** @internal */
+  _dirtyLeaves: Set<NodeKey>;
+  /** @internal */
+  _dirtyElements: Map<NodeKey, IntentionallyMarkedAsDirtyElement>;
+}
