@@ -1,4 +1,4 @@
-import { LexicalEditor } from './LexicalEditor';
+import type { LexicalEditor } from './LexicalEditor';
 
 let activeEditor: null | LexicalEditor = null;
 
