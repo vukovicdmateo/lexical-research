@@ -1,11 +1,20 @@
+import type { DOMExportOutput } from './LexicalNode';
+
 import { createEmptyEditorState } from './LexicalEditorState';
 import { internalGetActiveEditor } from './LexicalUpdates';
+import { LexicalNode } from './LexicalNode';
 
 // https://github.com/microsoft/TypeScript/issues/3841
 type GenericConstructor<T> = new (...args: any[]) => T;
 // Allow us to look up the type including static props
 export type KlassConstructor<Cls extends GenericConstructor<any>> =
   GenericConstructor<InstanceType<Cls>> & { [k in keyof Cls]: Cls[k] };
+
+export type Klass<T extends LexicalNode> = InstanceType<
+  T['constructor']
+> extends T
+  ? T['constructor']
+  : GenericConstructor<T> & T['constructor'];
 
 export type EditorThemeClassName = string;
 
@@ -26,6 +35,21 @@ export type CreateEditorArgs = {
   theme?: EditorThemeClasses;
 };
 
+export type Transform<T extends LexicalNode> = (node: T) => void;
+
+export type RegisteredNode = {
+  klass: Klass<LexicalNode>;
+  transforms: Set<Transform<LexicalNode>>;
+  replace: null | ((node: LexicalNode) => LexicalNode);
+  replaceWithKlass: null | Klass<LexicalNode>;
+  exportDOM?: (
+    editor: LexicalEditor,
+    targetNode: LexicalNode
+  ) => DOMExportOutput;
+};
+
+export type RegisteredNodes = Map<string, RegisteredNode>;
+
 export function createEditor(editorConfig?: CreateEditorArgs) {
   const config = editorConfig || {};
   const activeEditor = internalGetActiveEditor();
@@ -36,4 +60,6 @@ export function createEditor(editorConfig?: CreateEditorArgs) {
   const editorState = createEmptyEditorState();
 }
 
-export class LexicalEditor {}
+export class LexicalEditor {
+  _nodes: RegisteredNodes;
+}

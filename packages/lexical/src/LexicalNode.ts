@@ -1,5 +1,7 @@
 import invariant from 'shared/invariant';
-import type { KlassConstructor } from './LexicalEditor';
+import type { Klass, KlassConstructor } from 'lexical';
+import { errorOnReadOnly, getActiveEditor } from './LexicalUpdates';
+import { $setNodeKey } from './LexicalUtils';
 
 type NodeName = string;
 
@@ -27,6 +29,13 @@ export type DOMConversionMap<T extends HTMLElement = HTMLElement> = Record<
   NodeName,
   (node: T) => DOMConversion<T> | null
 >;
+
+export type DOMExportOutput = {
+  after?: (
+    generatedElement: HTMLElement | DocumentFragment | Text | null | undefined
+  ) => HTMLElement | Text | null | undefined;
+  element: HTMLElement | DocumentFragment | Text | null;
+};
 
 export type NodeKey = string;
 
@@ -61,6 +70,46 @@ export class LexicalNode {
   }
 
   static importDOM?: () => DOMConversionMap<any> | null;
+
+  constructor(key?: NodeKey) {
+    this.__type = this.constructor.getType();
+    this.__parent = null;
+    this.__prev = null;
+    this.__next = null;
+    $setNodeKey(this, key);
+
+    if (__DEV__) {
+      if (this.__type !== 'root') {
+        errorOnReadOnly();
+        errorOnTypeKlassMismatch(this.__type, this.constructor);
+      }
+    }
+  }
 }
 
 export type NodeMap = Map<NodeKey, LexicalNode>;
+
+function errorOnTypeKlassMismatch(
+  type: string,
+  klass: Klass<LexicalNode>
+): void {
+  const registeredNode = getActiveEditor()._nodes.get(type);
+  // Common error - split in its own invariant
+  if (registeredNode === undefined) {
+    invariant(
+      false,
+      'Create node: Attempted to create node %s that was not configured to be used on the editor.',
+      klass.name
+    );
+  }
+  const editorKlass = registeredNode.klass;
+  if (editorKlass !== klass) {
+    invariant(
+      false,
+      'Create node: Type %s in node %s does not match registered node %s with the same type',
+      type,
+      klass.name,
+      editorKlass.name
+    );
+  }
+}
