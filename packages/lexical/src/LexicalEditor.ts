@@ -1,6 +1,12 @@
 import { createEmptyEditorState } from './LexicalEditorState';
 import { internalGetActiveEditor } from './LexicalUpdates';
 
+// https://github.com/microsoft/TypeScript/issues/3841
+type GenericConstructor<T> = new (...args: any[]) => T;
+// Allow us to look up the type including static props
+export type KlassConstructor<Cls extends GenericConstructor<any>> =
+  GenericConstructor<InstanceType<Cls>> & { [k in keyof Cls]: Cls[k] };
+
 export type EditorThemeClassName = string;
 
 export type EditorThemeClasses = {
