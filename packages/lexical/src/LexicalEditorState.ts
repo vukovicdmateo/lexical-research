@@ -1,7 +1,7 @@
 import type { NodeMap } from './LexicalNode';
 
 export function createEmptyEditorState(): EditorState {
-  // TODO: (2) Continue here
+  // TODO: (3) Continue here
   return new EditorState();
 }
 
