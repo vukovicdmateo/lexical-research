@@ -10,6 +10,7 @@ import {
 } from './LexicalUpdates';
 import { HAS_DIRTY_NODES } from './LexicalConstants';
 import { $isElementNode } from './nodes/LexicalElementNode';
+import { EditorState } from './LexicalEditorState';
 
 let keyCounter = 1;
 
@@ -85,4 +86,16 @@ export function isLexicalEditor(editor: unknown): editor is LexicalEditor {
 export function getEditorPropertyFromDOMNode(node: Node | null): unknown {
   // @ts-expect-error: internal field
   return node ? node.__lexicalEditor : null;
+}
+
+export function $getNodeByKey<T extends LexicalNode>(
+  key: NodeKey,
+  _editorState?: EditorState
+): T | null {
+  const editorState = _editorState || getActiveEditorState();
+  const node = editorState._nodeMap.get(key) as T;
+  if (node === undefined) {
+    return null;
+  }
+  return node;
 }

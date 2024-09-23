@@ -1,7 +1,7 @@
 import invariant from 'shared/invariant';
 import type { Klass, KlassConstructor } from 'lexical';
 import { errorOnReadOnly, getActiveEditor } from './LexicalUpdates';
-import { $setNodeKey } from './LexicalUtils';
+import { $getNodeByKey, $setNodeKey } from './LexicalUtils';
 
 type NodeName = string;
 
@@ -86,7 +86,51 @@ export class LexicalNode {
     }
   }
 
-  // TODO: (1) Continue here
+  // Getters and Traversers
+
+  getType(): string {
+    return this.__type;
+  }
+
+  isInline(): boolean {
+    invariant(
+      false,
+      'LexicalNode: Node %s does not implement .isInline().',
+      this.constructor.name
+    );
+  }
+
+  /**
+   * Returns true if there is a path between this node and the RootNode, false otherwise.
+   * This is a way of determining if the node is "attached" EditorState. Unattached nodes
+   * won't be reconciled and will ultimatelt be cleaned up by the Lexical GC.
+   */
+  isAttached(): boolean {
+    let nodeKey: string | null = this.__key;
+    while (nodeKey !== null) {
+      if (nodeKey === 'root') {
+        return true;
+      }
+
+      const node: LexicalNode | null = $getNodeByKey(nodeKey);
+
+      if (node === null) {
+        break;
+      }
+      nodeKey = node.__parent;
+    }
+    return false;
+  }
+
+  // TODO: (1) implement isSelected
+  isSelected() {
+    return false;
+  }
+
+  getKey(): NodeKey {
+    // Key is stable between copies
+    return this.__key;
+  }
 }
 
 export type NodeMap = Map<NodeKey, LexicalNode>;
