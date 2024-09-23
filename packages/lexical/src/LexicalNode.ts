@@ -2,6 +2,8 @@ import invariant from 'shared/invariant';
 import type { Klass, KlassConstructor } from 'lexical';
 import { errorOnReadOnly, getActiveEditor } from './LexicalUpdates';
 import { $getNodeByKey, $setNodeKey } from './LexicalUtils';
+import { $getSelection, BaseSelection } from './LexicalSelection';
+import { $isTextNode } from './nodes/LexicalTextNode';
 
 type NodeName = string;
 
@@ -122,8 +124,22 @@ export class LexicalNode {
     return false;
   }
 
-  // TODO: (1) implement isSelected
-  isSelected() {
+  isSelected(selection?: null | BaseSelection): boolean {
+    const targetSelection = selection || $getSelection();
+
+    if (targetSelection == null) {
+      return false;
+    }
+
+    const isSelected = targetSelection
+      .getNodes()
+      .some((n) => n.__key === this.__key);
+
+    if ($isTextNode(this)) {
+      return isSelected;
+    }
+
+    // TODO: (2) Continue here
     return false;
   }
 
