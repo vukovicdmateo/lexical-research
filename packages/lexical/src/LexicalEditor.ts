@@ -1,4 +1,4 @@
-import type { DOMExportOutput } from './LexicalNode';
+import type { DOMExportOutput, NodeKey } from './LexicalNode';
 
 import { createEmptyEditorState } from './LexicalEditorState';
 import { internalGetActiveEditor } from './LexicalUpdates';
@@ -37,6 +37,8 @@ export type CreateEditorArgs = {
 
 export type Transform<T extends LexicalNode> = (node: T) => void;
 
+type IntentionallyMarkedAsDirtyElement = boolean;
+
 export type RegisteredNode = {
   klass: Klass<LexicalNode>;
   transforms: Set<Transform<LexicalNode>>;
@@ -62,4 +64,8 @@ export function createEditor(editorConfig?: CreateEditorArgs) {
 
 export class LexicalEditor {
   _nodes: RegisteredNodes;
+  _dirtyType: 0 | 1 | 2;
+  _cloneNotNeeded: Set<NodeKey>;
+  _dirtyLeaves: Set<NodeKey>;
+  _dirtyElements: Map<NodeKey, IntentionallyMarkedAsDirtyElement>;
 }
