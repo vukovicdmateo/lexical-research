@@ -1,5 +1,6 @@
 import invariant from 'shared/invariant';
 import type { LexicalNode, NodeKey } from './LexicalNode';
+import { LexicalEditor } from './LexicalEditor';
 import {
   internalGetActiveEditorState,
   errorOnReadOnly,
@@ -74,4 +75,14 @@ function errorOnNodeKeyConstructorMismatch(
       );
     }
   }
+}
+
+export function isLexicalEditor(editor: unknown): editor is LexicalEditor {
+  // Check instanceof to prevent issues with multiple embedded Lexical installations
+  return editor instanceof LexicalEditor;
+}
+
+export function getEditorPropertyFromDOMNode(node: Node | null): unknown {
+  // @ts-expect-error: internal field
+  return node ? node.__lexicalEditor : null;
 }
