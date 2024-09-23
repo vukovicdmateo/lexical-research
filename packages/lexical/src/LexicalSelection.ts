@@ -48,7 +48,71 @@ export interface BaseSelection {
 }
 
 // @ts-ignore TODO: (1) Continue here
-export class RangeSelection implements BaseSelection {}
+export class RangeSelection implements BaseSelection {
+  format: number;
+  style: string;
+  anchor: PointType;
+  focus: PointType;
+  _cachedNodes: Array<LexicalNode> | null;
+  dirty: boolean;
+
+  constructor(
+    anchor: PointType,
+    focus: PointType,
+    format: number,
+    style: string
+  ) {
+    this.anchor = anchor;
+    this.focus = focus;
+    // TODO: check this out
+    anchor._selection = this;
+    focus._selection = this;
+    this._cachedNodes = null;
+    this.format = format;
+    this.style = style;
+    this.dirty = false;
+  }
+
+  getCachedNodes(): LexicalNode[] | null {
+    return this._cachedNodes;
+  }
+
+  setCachedNodes(nodes: LexicalNode[] | null): void {
+    this._cachedNodes = nodes;
+  }
+
+  /**
+   * Used to check if the provided selections is equal to this one by value,
+   * inluding anchor, focus, format, and style properties.
+   * @param selection - the Selection to compare this one to.
+   * @returns true if the Selections are equal, false otherwise.
+   */
+  is(selection: null | BaseSelection): boolean {
+    if (!$isRangeSelection(selection)) {
+      return false;
+    }
+    return (
+      this.anchor.is(selection.anchor) &&
+      this.focus.is(selection.focus) &&
+      this.format === selection.format &&
+      this.style === selection.style
+    );
+  }
+
+  /**
+   * Returns whether the Selection is "collapsed", meaning the anchor and focus are
+   * the same node and have the same offset.
+   *
+   */
+  isCollapsed(): boolean {
+    return this.anchor.is(this.focus);
+  }
+
+  // TODO: (1) Continue here
+  getNodes() {
+    return this._cachedNodes;
+  }
+}
 
 export function $isRangeSelection(x: unknown): x is RangeSelection {
   return x instanceof RangeSelection;
