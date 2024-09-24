@@ -4,6 +4,7 @@ import { errorOnReadOnly, getActiveEditor } from './LexicalUpdates';
 import { $getNodeByKey, $setNodeKey } from './LexicalUtils';
 import { $getSelection, BaseSelection } from './LexicalSelection';
 import { $isTextNode } from './nodes/LexicalTextNode';
+import { ElementNode } from './nodes/LexicalElementNode';
 
 type NodeName = string;
 
@@ -139,13 +140,48 @@ export class LexicalNode {
       return isSelected;
     }
 
-    // TODO: (2) Continue here
+    // TODO: (3) Continue here
     return false;
   }
 
   getKey(): NodeKey {
     // Key is stable between copies
     return this.__key;
+  }
+
+  is(object: LexicalNode | null | undefined): boolean {
+    if (object == null) {
+      return false;
+    }
+    return this.__key === object.__key;
+  }
+
+  // TODO: (1) Continue here
+  getNodesBetween(targetNode: LexicalNode): Array<LexicalNode> {
+    return [];
+  }
+
+  getLatest(): this {
+    const latest = $getNodeByKey<this>(this.__key);
+    if (latest === null) {
+      invariant(
+        false,
+        'Lexical node does not exist in active editor state. Avoid using the same node references between nested closures from editorState.read/editor.update.'
+      );
+    }
+    return latest;
+  }
+
+  getPreviousSibling<T extends LexicalNode>(): T | null {
+    const self = this.getLatest();
+    const prevKey = self.__prev;
+    return prevKey === null ? null : $getNodeByKey<T>(prevKey);
+  }
+
+  getNextSibling<T extends LexicalNode>(): T | null {
+    const self = this.getLatest();
+    const nextKey = self.__next;
+    return nextKey === null ? null : $getNodeByKey<T>(nextKey);
   }
 }
 

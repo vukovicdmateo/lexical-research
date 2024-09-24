@@ -2,7 +2,11 @@ import type { NodeKey } from './LexicalNode';
 import { LexicalNode } from './LexicalNode';
 import type { TextNode } from './nodes/LexicalTextNode';
 import type { ElementNode } from './nodes/LexicalElementNode';
-import { getActiveEditorState } from './LexicalUpdates';
+import {
+  getActiveEditorState,
+  isCurrentlyReadOnlyMode,
+} from './LexicalUpdates';
+import { $isElementNode } from './nodes/LexicalElementNode';
 
 export type TextPointType = {
   _selection: BaseSelection;
@@ -47,7 +51,7 @@ export interface BaseSelection {
   setCachedNodes(nodes: LexicalNode[] | null): void;
 }
 
-// @ts-ignore TODO: (1) Continue here
+// @ts-ignore TODO: (2) Continue here
 export class RangeSelection implements BaseSelection {
   format: number;
   style: string;
@@ -108,9 +112,62 @@ export class RangeSelection implements BaseSelection {
     return this.anchor.is(this.focus);
   }
 
-  // TODO: (1) Continue here
-  getNodes() {
-    return this._cachedNodes;
+  /**
+   * Gets all the nodes in the Selection. Uses caching to make it generally suitable
+   * for use in hot paths.
+   */
+  getNodes(): Array<LexicalNode> {
+    const cachedNodes = this._cachedNodes;
+    if (cachedNodes !== null) {
+      return cachedNodes;
+    }
+
+    const anchor = this.anchor;
+    const focus = this.focus;
+    const isBefore = anchor.isBefore(focus);
+    const firstPoint = isBefore ? anchor : focus;
+    const lastPoint = isBefore ? focus : anchor;
+    let firstNode = firstPoint.getNode();
+    let lastNode = lastPoint.getNode();
+    const startOffset = firstPoint.offset;
+    const endOffset = lastPoint.offset;
+
+    if ($isElementNode(firstNode)) {
+      const firstNodeDescendant =
+        firstNode.getDescendantByIndex<ElementNode>(startOffset);
+      firstNode = firstNodeDescendant != null ? firstNodeDescendant : firstNode;
+    }
+
+    if ($isElementNode(lastNode)) {
+      let lastNodeDescendant =
+        lastNode.getDescendantByIndex<ElementNode>(endOffset);
+      // We don't want to over-select, as node selection infers the child before
+      // the last descendant, not including that descendant.
+      if (
+        lastNodeDescendant !== null &&
+        lastNodeDescendant !== firstNode &&
+        lastNode.getChildAtIndex(endOffset) === lastNodeDescendant
+      ) {
+        lastNodeDescendant = lastNodeDescendant.getPreviousSibling();
+      }
+      lastNode = lastNodeDescendant != null ? lastNodeDescendant : lastNode;
+    }
+
+    let nodes: Array<LexicalNode>;
+
+    if (firstNode.is(lastNode)) {
+      if ($isElementNode(firstNode) && firstNode.getChildrenSize() > 0) {
+        nodes = [];
+      } else {
+        nodes = [firstNode];
+      }
+    } else {
+      nodes = firstNode.getNodesBetween(lastNode);
+    }
+    if (!isCurrentlyReadOnlyMode()) {
+      this._cachedNodes = nodes;
+    }
+    return nodes;
   }
 }
 
