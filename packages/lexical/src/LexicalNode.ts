@@ -140,7 +140,7 @@ export class LexicalNode {
       return isSelected;
     }
 
-    // TODO: (3) Continue here
+    // TODO: (2) Continue here
     return false;
   }
 

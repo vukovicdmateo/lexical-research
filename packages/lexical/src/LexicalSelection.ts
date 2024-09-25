@@ -51,7 +51,7 @@ export interface BaseSelection {
   setCachedNodes(nodes: LexicalNode[] | null): void;
 }
 
-// @ts-ignore TODO: (2) Continue here
+// @ts-ignore TODO: (1) Continue here
 export class RangeSelection implements BaseSelection {
   format: number;
   style: string;
